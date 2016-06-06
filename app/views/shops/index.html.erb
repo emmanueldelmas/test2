@@ -1,4 +1,16 @@
-<h1>Tous les magasins</h1>
+<h1><%= @limit ? "Les #{@limit} magasins les plus proches" : @distance ? "Les magasins dans un rayon de #{@distance}km" : "Tous les magasins" %></h1>
+
+<div id="search" class="hidden">
+	<%= form_tag shops_path, method: :get do %>
+		<%= hidden_field_tag "position[latitude]", nil, id: :get_latitude %>
+		<%= hidden_field_tag "position[longitude]", nil, id: :get_longitude %>
+		<%= label_tag :limit, "A moins de x km" %>
+		<%= number_field_tag :distance, @distance %>
+		<%= label_tag :limit, "Les x les plus proches" %>
+		<%= number_field_tag :limit, @limit %>
+		<%= submit_tag 'Chercher' %>
+	<% end %>
+</div>
 
 <div id='map_canvas' style="height: 500px;"></div>
 
@@ -23,42 +35,59 @@
 
 <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyApC8568UgUkwrt7DMfNpq0KtxKOwhiTbE&sensor=false&language=fr"> </script>
 <script type="text/javascript">
+	// On demande d'envoyer la position courante à la fonction callback
+	navigator.geolocation.getCurrentPosition( callback, erreur );
+	function callback( position ) {
+		var lat = position.coords.latitude;
+		var lng = position.coords.longitude;
+		console.log( lat, lng );
+		$('#search').removeClass("hidden")
+		$('#get_latitude').val(lat)
+		$('#get_longitude').val(lng)
+		// Do stuff
+	}
+	function erreur( error ) {
+		switch( error.code ) {
+		case error.PERMISSION_DENIED:
+			console.log( 'L\'utilisateur a refusé la demande' );
+			break;     
+		case error.POSITION_UNAVAILABLE:
+			console.log( 'Position indéterminée' );
+			break;
+		case error.TIMEOUT:
+			console.log( 'Réponse trop lente' );
+			break;
+		}
+	};
 	
 	function initialize() {
-	    var map;
-	    var bounds = new google.maps.LatLngBounds();
-	    var mapOptions = {
-	        mapTypeId: 'roadmap'
-	    };
-                    
-	    // Display a map on the page
-	    map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
-	    map.setTilt(45);
-        
-	    // Multiple Markers
-	    var markers = [
-				<%= @shops.collect{|shop| %Q{["#{shop[:name]}", #{shop[:latitude]}, #{shop[:longitude]}]} }.join(",").html_safe %>
-	    ];
-			
-        
-	    // Display multiple markers on a map
-	    var infoWindow = new google.maps.InfoWindow(), marker, i;
-    
-	    // Loop through our array of markers & place each one on the map  
-	    for( i = 0; i < markers.length; i++ ) {
-	        var position = new google.maps.LatLng(markers[i][1], markers[i][2]);
-	        bounds.extend(position);
-	        marker = new google.maps.Marker({
-	            position: position,
-	            map: map,
-	            title: markers[i][0]
-	        });
-
-	        // Automatically center the map fitting all markers on the screen
-					map.setCenter( bounds.getCenter());
-	        map.fitBounds(bounds);
-	    }
-    
+		var map;
+		var bounds = new google.maps.LatLngBounds();
+		var mapOptions = {
+			mapTypeId: 'roadmap'
+		};
+		// Display a map on the page
+		map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
+		map.setTilt(45);
+		// Multiple Markers
+		var markers = [
+			<%= @shops.collect{|shop| %Q{["#{shop[:name]}", #{shop[:latitude]}, #{shop[:longitude]}]} }.join(",").html_safe %>
+		];
+		// Display multiple markers on a map
+		var infoWindow = new google.maps.InfoWindow(), marker, i;
+		// Loop through our array of markers & place each one on the map  
+		for( i = 0; i < markers.length; i++ ) {
+			var position = new google.maps.LatLng(markers[i][1], markers[i][2]);
+			bounds.extend(position);
+			marker = new google.maps.Marker({
+				position: position,
+				map: map,
+				title: markers[i][0]
+			});
+			// Automatically center the map fitting all markers on the screen
+			map.setCenter( bounds.getCenter());
+			map.fitBounds(bounds);
+		}
 	}
 	$(document).ready(function(){initialize();});
 

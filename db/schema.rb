@@ -14,17 +14,17 @@
 ActiveRecord::Schema.define(version: 20160605110241) do
 
   create_table "shops", force: :cascade do |t|
-    t.string   "chain"
-    t.string   "name"
-    t.string   "address"
-    t.string   "city"
-    t.string   "zip"
-    t.string   "phone"
-    t.string   "country_code"
-    t.float    "latitude"
-    t.float    "longitude"
-    t.datetime "created_at",   null: false
-    t.datetime "updated_at",   null: false
+    t.string   "chain",        limit: 255
+    t.string   "name",         limit: 255
+    t.string   "address",      limit: 255
+    t.string   "city",         limit: 255
+    t.string   "zip",          limit: 255
+    t.string   "phone",        limit: 255
+    t.string   "country_code", limit: 255
+    t.float    "latitude",     limit: 24
+    t.float    "longitude",    limit: 24
+    t.datetime "created_at",               null: false
+    t.datetime "updated_at",               null: false
   end
 
 end

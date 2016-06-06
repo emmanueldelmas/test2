@@ -1,6 +1,14 @@
 class ShopsController < ApplicationController
   def index
-    @shops = Shop.all.to_a
+    @distance = params[:distance].to_i if params[:distance].to_i != 0
+    @limit = params[:limit].to_i if params[:limit].to_i != 0
+    if @limit
+      @shops = Shop.closest( params[:position], @limit, @distance || 50)
+    elsif @distance
+      @shops = Shop.around( params[:position], @distance)
+    else
+      @shops = Shop.all.to_a
+    end
   end
 
   def new
