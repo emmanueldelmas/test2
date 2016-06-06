@@ -1,0 +1,65 @@
+<h1>Tous les magasins</h1>
+
+<div id='map_canvas' style="height: 500px;"></div>
+
+<table class="table table-striped table-responsive">
+  <thead>
+    <tr>
+			<% ["Chain","Name","Address","City","Zip","Phone","Country"].each do |field| %>
+      <td><%= field %></td>
+			<% end %>
+    </tr>
+  </thead>
+  <tbody>
+		<% @shops.each do |shop| %>
+    <tr>
+			<% ["chain","name","address","city","zip","phone","country_code"].each do |field| %>
+      <td><%= shop[field] %></td>
+			<% end %>
+    </tr>
+		<% end %>
+  </tbody>
+</table>
+
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyApC8568UgUkwrt7DMfNpq0KtxKOwhiTbE&sensor=false&language=fr"> </script>
+<script type="text/javascript">
+	
+	function initialize() {
+	    var map;
+	    var bounds = new google.maps.LatLngBounds();
+	    var mapOptions = {
+	        mapTypeId: 'roadmap'
+	    };
+                    
+	    // Display a map on the page
+	    map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
+	    map.setTilt(45);
+        
+	    // Multiple Markers
+	    var markers = [
+				<%= @shops.collect{|shop| %Q{["#{shop[:name]}", #{shop[:latitude]}, #{shop[:longitude]}]} }.join(",").html_safe %>
+	    ];
+			
+        
+	    // Display multiple markers on a map
+	    var infoWindow = new google.maps.InfoWindow(), marker, i;
+    
+	    // Loop through our array of markers & place each one on the map  
+	    for( i = 0; i < markers.length; i++ ) {
+	        var position = new google.maps.LatLng(markers[i][1], markers[i][2]);
+	        bounds.extend(position);
+	        marker = new google.maps.Marker({
+	            position: position,
+	            map: map,
+	            title: markers[i][0]
+	        });
+
+	        // Automatically center the map fitting all markers on the screen
+					map.setCenter( bounds.getCenter());
+	        map.fitBounds(bounds);
+	    }
+    
+	}
+	$(document).ready(function(){initialize();});
+
+</script>
